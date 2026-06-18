@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      sender: { name: "Belles Sœurs", email: "noreply@belles-soeurs.com" },
+      sender: { name: "Belles Sœurs", email: "contact@belles-soeurs.com" },
       to: [{ email }],
       subject: "Votre code de connexion — Belles Sœurs",
       htmlContent: `
