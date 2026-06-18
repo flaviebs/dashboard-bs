@@ -803,6 +803,12 @@ function LoginPage({ onLogin }: { onLogin: (email: string) => void }) {
 export default function Page() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [dashData, setDashData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [tab, setTab] = useState("vente");
+  const [caInput, setCaInput] = useState(MOCK.caPersonnel);
+  const [caEquipeInput, setCaEquipeInput] = useState(MOCK.caEquipe);
+  const [lignePlusFortInput, setLignePlusFortInput] = useState(MOCK.horsLignePlusFort);
 
   useEffect(() => {
     const token = localStorage.getItem("bs_token");
@@ -810,12 +816,30 @@ export default function Page() {
     if (token && email) {
       setIsLoggedIn(true);
       setUserEmail(email);
+      loadDashboard(email);
     }
   }, []);
+
+  const loadDashboard = async (email: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/dashboard?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      if (data.seller) {
+        setDashData(data);
+        setCaInput(data.caPersonnel);
+        setCaEquipeInput(data.caEquipe);
+      }
+    } catch (err) {
+      console.error("Erreur chargement dashboard:", err);
+    }
+    setLoading(false);
+  };
 
   const handleLogin = (email: string) => {
     setIsLoggedIn(true);
     setUserEmail(email);
+    loadDashboard(email);
   };
 
   const handleLogout = () => {
@@ -823,16 +847,30 @@ export default function Page() {
     localStorage.removeItem("bs_email");
     setIsLoggedIn(false);
     setUserEmail("");
+    setDashData(null);
   };
-
-  const [tab, setTab] = useState("vente");
-  const [caInput, setCaInput] = useState(MOCK.caPersonnel);
-  const [caEquipeInput, setCaEquipeInput] = useState(MOCK.caEquipe);
-  const [lignePlusFortInput, setLignePlusFortInput] = useState(MOCK.horsLignePlusFort);
 
   if (!isLoggedIn) return <LoginPage onLogin={handleLogin} />;
 
-  const data = { ...MOCK, caPersonnel: Number(caInput), caEquipe: Number(caEquipeInput), horsLignePlusFort: Number(lignePlusFortInput) };
+  if (loading) return (
+    <div style={{ minHeight: "100vh", background: "#F5F0E8", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Georgia, serif" }}>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: 11, letterSpacing: "0.2em", color: "#8B7355" }}>Chargement...</div>
+      </div>
+    </div>
+  );
+
+  const baseData = dashData ? {
+    prenom: dashData.seller.prenom,
+    nom: dashData.seller.nom,
+    email: dashData.seller.email,
+    dateDebut: dashData.seller.dateDebut,
+    mois: dashData.mois,
+    lignePlusFort: MOCK.lignePlusFort,
+    recrues: MOCK.recrues,
+    qualifieCommissionsEquipe: true,
+  } : MOCK;
+  const data = { ...baseData, caPersonnel: Number(caInput), caEquipe: Number(caEquipeInput), horsLignePlusFort: Number(lignePlusFortInput) };
   const boostVisible = boostActif(data.dateDebut);
 
   const tabs = [
@@ -930,3 +968,5 @@ export default function Page() {
     </div>
   );
 }
+
+      
