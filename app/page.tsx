@@ -649,6 +649,7 @@ function OngletSister({ data }: { data: any }) {
 function LoginPage({ onLogin }: { onLogin: (email: string) => void }) {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [sentCode, setSentCode] = useState("");
   const [step, setStep] = useState<"email" | "code">("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -665,6 +666,7 @@ function LoginPage({ onLogin }: { onLogin: (email: string) => void }) {
       });
       const data = await res.json();
       if (data.success) {
+        setSentCode(data.code);
         setStep("code");
       } else {
         setError(data.error || "Erreur envoi email");
@@ -683,7 +685,7 @@ function LoginPage({ onLogin }: { onLogin: (email: string) => void }) {
       const res = await fetch("/api/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code }),
+        body: JSON.stringify({ email, code, sentCode }),
       });
       const data = await res.json();
       if (data.success) {
