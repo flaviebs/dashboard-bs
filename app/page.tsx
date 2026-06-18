@@ -707,10 +707,7 @@ function LoginPage({ onLogin }: { onLogin: (email: string) => void }) {
     }}>
       <div style={{ width: "100%", maxWidth: 360 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ fontSize: 9, letterSpacing: "0.22em", color: "#8B7355", textTransform: "uppercase", marginBottom: 12 }}>
-            belles sœurs · france
-          </div>
-          <div style={{ fontSize: 26, color: "#2C1A0E" }}>Mon espace</div>
+          <img src="/LOGO BELLES SOEURS.png" alt="Belles Sœurs" style={{ height: 44, marginBottom: 8 }} />
         </div>
 
         <div style={{ background: "white", borderRadius: 16, padding: "28px 24px", boxShadow: "0 2px 12px rgba(44,26,14,0.08)" }}>
@@ -848,7 +845,7 @@ export default function Page() {
 
       {/* HEADER */}
       <div style={{ background: C.brun, padding: "22px 18px 18px", position: "sticky", top: 0, zIndex: 10 }}>
-        <img src={LOGO_BLANC} alt="Belles Sœurs" style={{ height: 28, marginBottom: 12, opacity: 0.9 }} />
+        <img src="/LOGO BELLES SOEURS blanc.png" alt="Belles Sœurs" style={{ height: 26, marginBottom: 10, opacity: 0.95 }} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <div>
             <div style={{ fontSize: 22, color: C.lin }}>Bonjour, {data.prenom}</div>
