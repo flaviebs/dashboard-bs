@@ -825,12 +825,12 @@ export default function Page() {
     setUserEmail("");
   };
 
-  if (!isLoggedIn) return <LoginPage onLogin={handleLogin} />;
-
   const [tab, setTab] = useState("vente");
   const [caInput, setCaInput] = useState(MOCK.caPersonnel);
   const [caEquipeInput, setCaEquipeInput] = useState(MOCK.caEquipe);
   const [lignePlusFortInput, setLignePlusFortInput] = useState(MOCK.horsLignePlusFort);
+
+  if (!isLoggedIn) return <LoginPage onLogin={handleLogin} />;
 
   const data = { ...MOCK, caPersonnel: Number(caInput), caEquipe: Number(caEquipeInput), horsLignePlusFort: Number(lignePlusFortInput) };
   const boostVisible = boostActif(data.dateDebut);
