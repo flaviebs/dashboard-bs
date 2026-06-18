@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Stockage temporaire des codes (en production utiliser Redis/KV)
 const codes: Record<string, { code: string; expires: number }> = {};
 
 export async function POST(req: NextRequest) {
@@ -10,25 +9,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Email requis" }, { status: 400 });
   }
 
-  // Générer code 6 chiffres
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const expires = Date.now() + 10 * 60 * 1000; // 10 minutes
-
-  // Stocker le code
+  const expires = Date.now() + 10 * 60 * 1000;
   codes[email.toLowerCase()] = { code, expires };
 
-  // Envoyer l'email via Resend
-  const res = await fetch("https://api.resend.com/emails", {
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
+      "api-key": process.env.BREVO_API_KEY!,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "noreply@mail.belles-soeurs.com",
-      to: email,
+      sender: { name: "Belles Sœurs", email: "noreply@belles-soeurs.com" },
+      to: [{ email }],
       subject: "Votre code de connexion — Belles Sœurs",
-      html: `
+      htmlContent: `
         <div style="font-family: Georgia, serif; max-width: 400px; margin: 0 auto; padding: 40px 20px; background: #F5F0E8;">
           <div style="font-size: 10px; letter-spacing: 0.2em; color: #8B7355; text-transform: uppercase; margin-bottom: 24px;">
             belles sœurs · france
@@ -52,13 +47,9 @@ export async function POST(req: NextRequest) {
 
   if (!res.ok) {
     const err = await res.json();
-    console.error("Resend error:", err);
+    console.error("Brevo error:", err);
     return NextResponse.json({ error: "Erreur envoi email" }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });
-}
-
-export function GET() {
-  return NextResponse.json({ codes }); // debug only — à supprimer en prod
 }
