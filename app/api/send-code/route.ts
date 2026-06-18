@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "onboarding@resend.dev",
+      from: "noreply@dashboard.belles-soeurs.com",
       to: email,
       subject: "Votre code de connexion — Belles Sœurs",
       html: `
