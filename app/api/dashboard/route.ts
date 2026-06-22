@@ -9,6 +9,7 @@ async function sahGet(endpoint: string, params: Record<string, string> = {}) {
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   const res = await fetch(url.toString(), {
     headers: { TOKEN, SECRET_KEY, "Content-Type": "application/json" },
+    cache: "no-store",
   });
   if (!res.ok) throw new Error(`SAH error ${res.status}`);
   return res.json();
@@ -21,21 +22,20 @@ export async function GET(req: NextRequest) {
   if (!email) return NextResponse.json({ error: "Email requis" }, { status: 400 });
 
   try {
-    // 1. Trouver le seller par email (pagination)
     let seller = null;
     let page = 1;
-    while (!seller) {
-      const sellers = await sahGet("/v1/Sellers", { page: page.toString(), offset: "100" });
+    while (!seller && page <= 20) {
+      const sellers = await sahGet("/v1/Sellers", { page: page.toString(), offset: "500" });
       if (!sellers || sellers.length === 0) break;
-      seller = sellers.find((s: any) => s.Email?.toLowerCase() === email.toLowerCase());
-      if (sellers.length < 100) break;
+      seller = sellers.find((s: any) =>
+        s.Email?.toLowerCase().trim() === email.toLowerCase().trim()
+      );
+      if (sellers.length < 500) break;
       page++;
-      if (page > 10) break;
     }
 
     if (!seller) return NextResponse.json({ error: "Consultante non trouvée" }, { status: 404 });
 
-    // 2. Récupérer les commandes du mois en cours
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
@@ -53,7 +53,6 @@ export async function GET(req: NextRequest) {
       if (ordersPage > 30) break;
     }
 
-    // 3. Filtrer commandes de ce seller ce mois
     const myOrders = allOrders.filter((o: any) => {
       if (!o.PaidDate || !o.Paid || o.Deleted) return false;
       const paidDate = new Date(o.PaidDate);
@@ -61,7 +60,6 @@ export async function GET(req: NextRequest) {
       return o.Seller?.Id === seller.Id;
     });
 
-    // 4. Calculer CA HT commissionnable
     let caPersonnel = 0;
     for (const order of myOrders) {
       for (const product of (order.Products || [])) {
@@ -84,7 +82,7 @@ export async function GET(req: NextRequest) {
         dateDebut: seller.StartActivityDate,
       },
       caPersonnel,
-      caEquipe: caPersonnel, // simplifié pour l'instant
+      caEquipe: caPersonnel,
       horsLignePlusFort: 0,
       mois: now.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
     });
