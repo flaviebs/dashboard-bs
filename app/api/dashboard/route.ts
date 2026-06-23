@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
       allOrders = allOrders.concat(orders);
       if (orders.length < 100) hasMore = false;
       ordersPage++;
-      if (ordersPage > 30) break;
+if (ordersPage > 5) break;
     }
 
     // 4. Filtrer commandes de ce seller ce mois
