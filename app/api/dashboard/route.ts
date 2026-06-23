@@ -7,7 +7,6 @@ const AIRTABLE_BASE = "app5aYHsfYw6LWjfx";
 const AIRTABLE_TABLE = "tblDjOuPCUO0KQ9e4";
 const AIRTABLE_KEY = process.env.AIRTABLE_KEY!;
 
-const FLD_EMAIL     = "fldfMPxGzovO8YDBl";
 const FLD_SELLER_ID = "fldpAiKqpbVylsF0K";
 const FLD_IS_ACTIVE = "fld4atG2k1AKXxSur";
 
@@ -23,7 +22,8 @@ async function sahGet(endpoint: string, params: Record<string, string> = {}) {
 
 async function getSellerFromAirtable(email: string): Promise<{ sahId: number; isActive: boolean } | null> {
   const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`);
-  url.searchParams.set("filterByFormula", `{${FLD_EMAIL}} = "${email.toLowerCase()}"`);
+  // Utiliser le NOM du champ dans la formule, pas l'ID
+  url.searchParams.set("filterByFormula", `{email} = "${email.toLowerCase()}"`);
   url.searchParams.set("fields[]", FLD_SELLER_ID);
   url.searchParams.set("fields[]", FLD_IS_ACTIVE);
   url.searchParams.set("maxRecords", "1");
@@ -114,7 +114,7 @@ export async function GET(req: NextRequest) {
         isActive: seller.IsActive,
       },
       caPersonnel,
-      caEquipe: caPersonnel, // à brancher plus tard
+      caEquipe: caPersonnel,
       horsLignePlusFort: 0,
       mois: now.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
     });
