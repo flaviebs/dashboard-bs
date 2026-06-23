@@ -7,9 +7,6 @@ const AIRTABLE_BASE = "app5aYHsfYw6LWjfx";
 const AIRTABLE_TABLE = "tblDjOuPCUO0KQ9e4";
 const AIRTABLE_KEY = process.env.AIRTABLE_KEY!;
 
-const FLD_SELLER_ID = "fldpAiKqpbVylsF0K";
-const FLD_IS_ACTIVE = "fld4atG2k1AKXxSur";
-
 async function sahGet(endpoint: string, params: Record<string, string> = {}) {
   const url = new URL(`${SAH_BASE}${endpoint}`);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
@@ -30,7 +27,13 @@ async function getSellerFromAirtable(email: string): Promise<{ sahId: number; is
   });
   if (!res.ok) throw new Error(`Airtable error ${res.status}`);
   const data = await res.json();
-  throw new Error(JSON.stringify(data));
+  if (!data.records || data.records.length === 0) return null;
+
+  const fields = data.records[0].fields;
+  return {
+    sahId: fields["seller_id"],
+    isActive: fields["is_active"] === true,
+  };
 }
 
 export async function GET(req: NextRequest) {
