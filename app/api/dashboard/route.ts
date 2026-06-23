@@ -22,10 +22,7 @@ async function sahGet(endpoint: string, params: Record<string, string> = {}) {
 
 async function getSellerFromAirtable(email: string): Promise<{ sahId: number; isActive: boolean } | null> {
   const url = new URL(`https://api.airtable.com/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}`);
-  // Utiliser le NOM du champ dans la formule, pas l'ID
   url.searchParams.set("filterByFormula", `{email} = "${email.toLowerCase()}"`);
-  url.searchParams.set("fields[]", FLD_SELLER_ID);
-  url.searchParams.set("fields[]", FLD_IS_ACTIVE);
   url.searchParams.set("maxRecords", "1");
 
   const res = await fetch(url.toString(), {
@@ -33,13 +30,7 @@ async function getSellerFromAirtable(email: string): Promise<{ sahId: number; is
   });
   if (!res.ok) throw new Error(`Airtable error ${res.status}`);
   const data = await res.json();
-  if (!data.records || data.records.length === 0) return null;
-
-  const fields = data.records[0].fields;
-  return {
-    sahId: fields[FLD_SELLER_ID],
-    isActive: fields[FLD_IS_ACTIVE] === true,
-  };
+  throw new Error(JSON.stringify(data));
 }
 
 export async function GET(req: NextRequest) {
